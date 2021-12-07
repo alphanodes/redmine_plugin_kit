@@ -1,0 +1,57 @@
+name: Tests
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.redmine }} ${{ matrix.db }} ruby-${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby: ['2.7', '2.6', '3.0']
+        redmine: ['4.1-stable', '4.2-stable', 'master']
+        exclude:
+          - ruby: '2.7'
+            redmine: 4.1-stable
+          - ruby: '3.0'
+            redmine: 4.1-stable
+          - ruby: '3.0'
+            redmine: 4.2-stable
+      fail-fast: false
+
+    steps:
+      - name: Checkout redmine_plugin_kit
+        uses: actions/checkout@v2
+        with:
+          path: redmine_plugin_kit
+
+      - name: Update package archives
+        run: sudo apt-get update --yes --quiet
+
+      - name: Install package dependencies
+        run: >
+          sudo apt-get install --yes --quiet
+          build-essential
+          cmake
+          libicu-dev
+          libpq-dev
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Install Ruby dependencies
+        working-directory: redmine_plugin_kit
+        run: |
+          bundle config set --local without 'development'
+          bundle install --jobs=4 --retry=3
+
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+        working-directory: redmine_plugin_kit
+        run: rake test RUBYOPT="-W0"

@@ -1,0 +1,10 @@
+first_project:
+  name: Project 1
+  description: Some description for the project 1
+  identifier: project1
+  status: 1
+second_project:
+  name: Project 2
+  description: Some description for the project 2
+  identifier: project2
+  status: 5

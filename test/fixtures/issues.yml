@@ -1,0 +1,24 @@
+first_issue:
+  subject: Issue 1 subject
+  description: Some description for the issue
+  user: jonathan
+  author: jonathan
+  project: first_project
+second_issue:
+  subject: Issue 2 subject
+  description: Second issue
+  user: jonathan
+  author: jonathan
+  project: first_project
+third_issue:
+  subject: Issue 3 subject
+  description: Third issue
+  user: sam
+  author: homer
+  project: second_project
+fourth_issue:
+  subject: Issue 4 subject
+  description: Fourth issue
+  user: sam
+  author: sam
+  project: second_project

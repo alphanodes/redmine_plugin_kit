@@ -1,0 +1,34 @@
+name: Run Rubocop
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install package dependencies
+      run: >
+        sudo apt-get install --yes --quiet pandoc
+
+    - name: Setup Gemfile
+      run: |
+        touch .enable_dev
+        sed -i "3isource 'https://rubygems.org'" Gemfile
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.6
+        bundler-cache: true
+
+    - name: Setup gems
+      run: |
+        bundle install --jobs 4 --retry 3
+
+    - name: Run RuboCop
+      run: |
+        bundle exec rubocop -S

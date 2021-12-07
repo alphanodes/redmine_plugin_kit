@@ -1,0 +1,9 @@
+jonathan:
+  name: Jonathan
+  language: 'EN'
+sam:
+  name: Sam
+  language: 'RU'
+homer:
+  name: Homer
+  language: 'CH'
