@@ -14,11 +14,6 @@ jobs:
       run: >
         sudo apt-get install --yes --quiet pandoc
 
-    - name: Setup Gemfile
-      run: |
-        touch .enable_dev
-        sed -i "3isource 'https://rubygems.org'" Gemfile
-
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
