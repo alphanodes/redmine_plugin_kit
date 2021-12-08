@@ -22,6 +22,7 @@ jobs:
 
     - name: Setup gems
       run: |
+        cp test/support/gemfile.rb Gemfile
         bundle install --jobs 4 --retry 3
 
     - name: Run RuboCop
