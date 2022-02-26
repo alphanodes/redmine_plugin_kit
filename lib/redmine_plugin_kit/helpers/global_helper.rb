@@ -17,9 +17,9 @@ module RedminePluginKit
         parts = url.split '://'
         name = if parts.count.positive?
                  parts.shift
-                 parts.join
+                 parts.join.chomp '/'
                else
-                 url
+                 url.chomp '/'
                end
 
         link_to_external name, url, **options
