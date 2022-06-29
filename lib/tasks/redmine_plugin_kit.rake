@@ -8,7 +8,7 @@ namespace :redmine_plugin_kit do
     bundle exec rake redmine_plugin_kit:drop_settings RAILS_ENV=production plugin="redmine_plugin_example"
   DESCRIPTION
   task drop_settings: :environment do
-    plugin = ENV['plugin']
+    plugin = ENV.fetch 'plugin', nil
 
     if plugin.blank?
       puts 'Parameter plugin is required.'
@@ -30,11 +30,11 @@ namespace :redmine_plugin_kit do
   DESCRIPTION
   task setting_set: :environment do
     name = ENV['name'] ||= 'redmine'
-    setting = ENV['setting']
+    setting = ENV.fetch 'setting', nil
     value = if ENV['values'].present?
               ENV['values'].split ','
             else
-              ENV['value']
+              ENV.fetch 'value', nil
             end
 
     if name.blank? || setting.blank? || value.blank?
@@ -64,7 +64,7 @@ namespace :redmine_plugin_kit do
   DESCRIPTION
   task setting_get: :environment do
     name = ENV['name'] ||= 'redmine'
-    setting = ENV['setting']
+    setting = ENV.fetch 'setting', nil
 
     if setting.blank?
       puts 'Parameters setting is required'
