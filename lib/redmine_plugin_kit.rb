@@ -10,7 +10,7 @@ require 'redmine_plugin_kit/loader'
 
 require 'redmine_plugin_kit/helpers/global_helper'
 
-ActionView::Base.include RedminePluginKit::Helpers::GlobalHelper if defined?(ActionView::Base)
+ActiveSupport.on_load(:action_view) { include RedminePluginKit::Helpers::GlobalHelper } if defined?(ActionView::Base)
 
 module RedminePluginKit
   class << self

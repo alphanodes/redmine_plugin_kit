@@ -251,7 +251,7 @@ module RedminePluginKit
       Rails.logger.debug { "global helpers for #{plugin_id}: #{global_helpers.inspect}" } if debug
 
       global_helpers.each do |h|
-        ActionView::Base.include h
+        ActiveSupport.on_load(:action_view) { include h }
       end
     end
   end
