@@ -92,6 +92,7 @@ class LoaderTest < ActiveSupport::TestCase
 
   def test_plugin_dir
     loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+
     assert loader.plugin_dir.end_with? 'redmine_plugin_kit/test/redmine_test_plugin'
   end
 
@@ -107,6 +108,7 @@ class LoaderTest < ActiveSupport::TestCase
 
   def test_apply_without_data
     loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+
     assert loader.apply!
   end
 
@@ -115,6 +117,7 @@ class LoaderTest < ActiveSupport::TestCase
     loader.add_helper 'Settings'
     loader.add_patch 'Issue'
     loader.add_global_helper RedmineTestPluginSettingsHelper
+
     assert loader.apply!
   end
 
@@ -140,11 +143,13 @@ class LoaderTest < ActiveSupport::TestCase
 
   def test_load_model_hooks
     hooks = RedminePluginKit::Loader.new(plugin_id: @plugin_id).load_model_hooks!
+
     assert hooks.is_a? Module
   end
 
   def test_load_hooks
     hooks = RedminePluginKit::Loader.new(plugin_id: @plugin_id).load_view_hooks!
+
     assert hooks.is_a? Module
   end
 
