@@ -3,6 +3,7 @@
 coverage/
 tmp/
 Gemfile.lock
+.ruby-version
 .project
 .settings/
 ._*
