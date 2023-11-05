@@ -27,7 +27,7 @@ module RedminePluginKit
     end
 
     def textarea_cols(text, min: 8, max: 20)
-      [[min, text.to_s.length / 50].max, max].min
+      [[min, text.to_s.length / 50].max, max].min # rubocop: disable Style/ComparableClamp
     end
   end
 end

@@ -19,7 +19,7 @@ If you are a Redmine developer, feel free and offer PRs with your Improvements.
 ## Requirements
 
 - Redmine `>= 4.1.0` (including upcoming)
-- Ruby `>= 2.6` (only maintained ruby versions are supported)
+- Ruby `>= 2.7` (only maintained ruby versions are supported)
 
 ## Installation
 

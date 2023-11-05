@@ -20,12 +20,8 @@ Gem::Specification.new do |spec|
     f.match %r{^((test|spec|features)/|Gemfile)}
   end
   spec.require_paths = ['lib']
-  spec.required_ruby_version = '>= 2.6'
+  spec.required_ruby_version = '>= 2.7'
 
   spec.add_runtime_dependency 'deface', '1.9.0'
   spec.add_runtime_dependency 'rails'
-
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'sqlite3'
 end

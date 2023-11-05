@@ -7,13 +7,12 @@ module RedminePluginKit
     attr_accessor :plugin_id, :debug
 
     class << self
-      def to_prepare(*args, &block)
+      def to_prepare(...)
         if Rails.version > '6.0'
           # INFO: https://www.redmine.org/issues/36245
           Rails.logger.info 'after_plugins_loaded hook should be used instead'
         else
-          # ActiveSupport::Reloader.to_prepare(*args, &block)
-          Rails.configuration.to_prepare(*args, &block)
+          Rails.configuration.to_prepare(...)
         end
       end
 
