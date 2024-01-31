@@ -15,7 +15,7 @@ namespace :redmine_plugin_kit do
       exit 2
     end
 
-    Setting.where(name: "plugin_#{plugin}".to_sym).destroy_all
+    Setting.where(name: :"plugin_#{plugin}").destroy_all
     Setting.clear_cache
     puts "Setting for plugin #{plugin} has been dropped."
   end
