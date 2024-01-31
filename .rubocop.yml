@@ -5,7 +5,7 @@ require:
 
 AllCops:
   TargetRubyVersion: 2.7
-  TargetRailsVersion: 5.2
+  TargetRailsVersion: 6.1
   NewCops: enable
 
 Rails:

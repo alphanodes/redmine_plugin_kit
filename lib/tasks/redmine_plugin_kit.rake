@@ -45,7 +45,7 @@ namespace :redmine_plugin_kit do
     if name == 'redmine'
       Setting[setting.to_sym] = value
     else
-      plugin_name = "plugin_#{name}".to_sym
+      plugin_name = :"plugin_#{name}"
       plugin_settings = Setting[plugin_name]
       plugin_settings[setting] = value
       Setting[plugin_name] = plugin_settings
@@ -74,7 +74,7 @@ namespace :redmine_plugin_kit do
     if name == 'redmine'
       puts Setting.send(setting)
     else
-      plugin_name = "plugin_#{name}".to_sym
+      plugin_name = :"plugin_#{name}"
       plugin_settings = Setting[plugin_name]
       puts plugin_settings[setting]
     end

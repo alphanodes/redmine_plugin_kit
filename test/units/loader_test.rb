@@ -144,13 +144,13 @@ class LoaderTest < ActiveSupport::TestCase
   def test_load_model_hooks
     hooks = RedminePluginKit::Loader.new(plugin_id: @plugin_id).load_model_hooks!
 
-    assert hooks.is_a? Module
+    assert_kind_of Module, hooks
   end
 
   def test_load_hooks
     hooks = RedminePluginKit::Loader.new(plugin_id: @plugin_id).load_view_hooks!
 
-    assert hooks.is_a? Module
+    assert_kind_of Module, hooks
   end
 
   def test_load_macros
