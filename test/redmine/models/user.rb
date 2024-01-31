@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class User < ActiveRecord::Base
+class User < Rails.version < '7.1' ? ActiveRecord::Base : ApplicationRecord
   has_many :issues
 
   def self.current
