@@ -17,7 +17,11 @@ module ActiveSupport
   class TestCase
     include ActiveRecord::TestFixtures
 
-    self.fixture_path = "#{File.dirname __FILE__}/fixtures/"
+    if respond_to? :fixture_paths=
+      fixture_paths << "#{File.dirname __FILE__}/fixtures/"
+    else
+      self.fixture_path = "#{File.dirname __FILE__}/fixtures/"
+    end
 
     self.use_transactional_tests = true
     self.use_instantiated_fixtures = false
