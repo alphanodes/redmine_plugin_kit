@@ -16,9 +16,10 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/alphanodes/redmine_plugin_kit'
   spec.license       = 'GPL-2.0'
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
-    f.match %r{^((test|spec|features)/|Gemfile)}
+  spec.files         = Dir['**/*'].reject do |f|
+    f.match %r{^((doc|test|node_modules)/|Rakefile|Gemfile|Gemfile\.lock|redmine_plugin_kit\.gemspec|package\.json|yarn\.lock)}
   end
+
   spec.require_paths = ['lib']
   spec.required_ruby_version = '>= 2.7'
 
