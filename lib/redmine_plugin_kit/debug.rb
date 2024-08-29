@@ -14,6 +14,7 @@ module RedminePluginKit
 
         log message
         puts raw_msg(message) # rubocop: disable Rails/Output
+        true
       end
 
       private
