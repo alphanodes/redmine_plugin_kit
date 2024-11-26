@@ -8,5 +8,8 @@ gemspec
 group :development, :test do
   gem 'bundler', require: false
   gem 'rake', require: false
+end
+
+group :test do
   gem 'sqlite3', require: false
 end
