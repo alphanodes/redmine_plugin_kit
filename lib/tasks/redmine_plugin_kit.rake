@@ -79,4 +79,39 @@ namespace :redmine_plugin_kit do
       puts plugin_settings[setting]
     end
   end
+
+  desc 'Detects templates from the plugin that override Redmine core templates'
+  task detect_overwritten_templates: :environment do
+    redmine_views_root = Rails.root.join 'app/views'
+
+    Rails.root.glob('plugins/*').each do |plugin_path|
+      plugin_path = plugin_path.to_s
+      plugin_views = Dir.glob "#{plugin_path}/app/views/**/*.{erb,slim}"
+      overwritten = []
+
+      plugin_views.each do |plugin_file|
+        relative_path = plugin_file.sub %r{^#{Regexp.escape plugin_path}/app/views/}, ''
+        base_path = relative_path.sub(/\.(erb|slim)$/, '')
+        redmine_template = redmine_views_root.join "#{base_path}.erb"
+
+        overwritten << "app/views/#{base_path}.erb" if File.exist? redmine_template
+      end
+
+      output_file = File.join plugin_path, '.overwritten_templates'
+      previous_content = if File.exist? output_file
+                           lines = File.read(output_file).lines.map(&:strip)
+                           lines.sort
+                         else
+                           []
+                         end
+      new_content = overwritten.sort
+
+      if previous_content == new_content
+        puts "✔️  No changes for: #{File.basename plugin_path}"
+      else
+        File.write output_file, "#{new_content.join "\n"}\n"
+        puts "✅ Updated: #{output_file}"
+      end
+    end
+  end
 end
