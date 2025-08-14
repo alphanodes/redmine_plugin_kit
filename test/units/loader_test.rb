@@ -86,7 +86,7 @@ class LoaderTest < ActiveSupport::TestCase
     spec = File.join 'wiki_macros', '**/*_macro.rb'
     files = loader.require_files spec
 
-    assert files.count.positive?
+    assert files.any?
     assert(files.detect { |file| file.include? 'test_macro' })
   end
 
@@ -102,7 +102,7 @@ class LoaderTest < ActiveSupport::TestCase
     spec = File.join 'helpers', "**/#{@plugin_id}_*.rb"
     files = loader.require_files spec, use_app: true
 
-    assert files.count.positive?
+    assert files.any?
     assert(files.detect { |file| file.include? 'redmine_test_plugin_settings_helper' })
   end
 
@@ -157,7 +157,7 @@ class LoaderTest < ActiveSupport::TestCase
     loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
     macros = loader.load_macros!
 
-    assert macros.count.positive?
+    assert macros.any?
     assert(macros.detect { |macro| macro.include? 'test_macro' })
   end
 end

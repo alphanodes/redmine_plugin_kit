@@ -121,6 +121,9 @@ Style/MethodCallWithArgsParentheses:
 Style/HashTransformKeys:
   Enabled: false
 
+Naming/PredicateMethod:
+  Enabled: false
+
 Style/HashTransformValues:
   Enabled: false
 

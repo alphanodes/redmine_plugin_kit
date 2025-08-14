@@ -15,7 +15,7 @@ module RedminePluginKit
         return if url.blank?
 
         parts = url.split '://'
-        name = if parts.count.positive?
+        name = if parts.any?
                  parts.shift
                  parts.join.chomp '/'
                else
