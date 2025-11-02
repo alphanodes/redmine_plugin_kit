@@ -2,7 +2,6 @@
 
 source 'https://rubygems.org'
 
-gem 'pandoc-ruby', require: false
 gem 'rubocop', require: false
 gem 'rubocop-minitest', require: false
 gem 'rubocop-performance', require: false
