@@ -28,10 +28,9 @@ module RedminePluginKit
       # required multiple times because of this bug: https://www.redmine.org/issues/33290
       def redmine_database_ready?(with_table = nil)
         ActiveRecord::Base.connection
-      rescue ActiveRecord::NoDatabaseError
-        false
-      else
         with_table.nil? || ActiveRecord::Base.connection.table_exists?(with_table)
+      rescue ActiveRecord::NoDatabaseError, ActiveRecord::ConnectionNotEstablished, ActiveRecord::StatementInvalid
+        false
       end
 
       def plugin_dir(plugin_id:)
@@ -212,7 +211,7 @@ module RedminePluginKit
                        end
 
         target = patch[:target]
-        target.include patch_module unless target.included_modules.include? patch_module
+        target.include patch_module unless target.include? patch_module
       end
     end
 

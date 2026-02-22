@@ -8,6 +8,37 @@ class LoaderTest < ActiveSupport::TestCase
     @plugin_id = 'redmine_test_plugin'
   end
 
+  # redmine_database_ready? tests
+  def test_redmine_database_ready_returns_true_with_existing_table
+    assert RedminePluginKit::Loader.redmine_database_ready?('users')
+  end
+
+  def test_redmine_database_ready_returns_false_with_nonexistent_table
+    assert_not RedminePluginKit::Loader.redmine_database_ready?('nonexistent_table')
+  end
+
+  def test_redmine_database_ready_returns_true_without_table_argument
+    assert RedminePluginKit::Loader.redmine_database_ready?
+  end
+
+  def test_redmine_database_ready_returns_false_when_no_database_error
+    original_method = ActiveRecord::Base.method :connection
+    ActiveRecord::Base.define_singleton_method(:connection) { raise ActiveRecord::NoDatabaseError }
+
+    assert_not RedminePluginKit::Loader.redmine_database_ready?('users')
+  ensure
+    ActiveRecord::Base.define_singleton_method :connection, original_method
+  end
+
+  def test_redmine_database_ready_returns_false_when_connection_not_established
+    original_method = ActiveRecord::Base.method :connection
+    ActiveRecord::Base.define_singleton_method(:connection) { raise ActiveRecord::ConnectionNotEstablished }
+
+    assert_not RedminePluginKit::Loader.redmine_database_ready?('users')
+  ensure
+    ActiveRecord::Base.define_singleton_method :connection, original_method
+  end
+
   def test_add_patch
     loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
     loader.add_patch 'Issue'
