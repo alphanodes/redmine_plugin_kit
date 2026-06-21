@@ -38,6 +38,19 @@ module RedminePluginKit
 
       private
 
+      # Enforce a plugin's REQUIRED_ALPHANODES_PLUGINS (an array of plugin ids it
+      # hard-depends on). Called from setup! which runs via the
+      # after_plugins_loaded hook, i.e. AFTER every plugin is registered - so the
+      # alphabetical plugin load order is irrelevant here.
+      #
+      # This is why AlphaNodes plugins declare dependencies on other redmine_*
+      # plugins via REQUIRED_ALPHANODES_PLUGINS instead of requires_redmine_plugin:
+      # requires_redmine_plugin runs while init.rb is loaded (during alphabetical
+      # registration) and therefore only works for dependencies that load earlier,
+      # such as additionals / additional_tags. A dependency that loads later (e.g.
+      # redmine_automation depending on redmine_reporting) would raise
+      # PluginNotFound even though it is installed. To see a plugin's hard
+      # AlphaNodes dependencies, look at its REQUIRED_ALPHANODES_PLUGINS constant.
       # rubocop: disable Style/RaiseArgs
       def setup_required_plugins
         return unless defined? self::REQUIRED_ALPHANODES_PLUGINS
