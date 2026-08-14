@@ -89,9 +89,32 @@ module RedminePluginKit
 
       files.reverse! if reverse
       files.each do |f|
-        Rails.autoloaders.main.ignore << f if Rails.version > '6.0' && ignore_autoload
+        if Rails.version > '6.0' && ignore_autoload
+          Rails.autoloaders.main.ignore << f
+          # Such a file registers itself in a registry that lives on a module
+          # Zeitwerk rebuilds on every reload (Redmine::FieldFormat). The
+          # registration is lost with the old module, and require would be a
+          # no-op the second time round - the custom field then falls back to a
+          # plain text field showing the raw id. Reloading the file restores it.
+          #
+          # NOTE: the require below stays as it is, so booting behaves exactly as
+          # before and does not depend on when to_prepare runs. Loading the file
+          # again in the first prepare run is harmless: these files only define a
+          # class and register it under a fixed name.
+          reload_on_prepare f
+        end
+
         require f
       end
+    end
+
+    # Load the file again after every code reload.
+    #
+    # The block keeps the order of the surrounding loop, which matters because
+    # formats may inherit from each other (CompanyFormat < ContactFormat) - a
+    # subclass loaded before its parent raises NameError.
+    def reload_on_prepare(file)
+      ActiveSupport::Reloader.to_prepare { load file }
     end
 
     def incompatible?(plugins = [])

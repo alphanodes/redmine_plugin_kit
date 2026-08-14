@@ -28,3 +28,17 @@ module ActiveSupport
     fixtures :all
   end
 end
+
+# Records which probe files have been loaded, so a test can tell a repeated
+# load from a no-op require (see LoaderTest reload_on_prepare tests).
+class ReloadProbe
+  class << self
+    def loaded
+      @loaded ||= []
+    end
+
+    def reset!
+      @loaded = []
+    end
+  end
+end

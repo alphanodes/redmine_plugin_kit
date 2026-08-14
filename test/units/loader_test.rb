@@ -6,6 +6,10 @@ require File.expand_path '../redmine_test_plugin/redmine_test_plugin', __dir__
 class LoaderTest < ActiveSupport::TestCase
   def setup
     @plugin_id = 'redmine_test_plugin'
+    # to_prepare blocks are kept globally, so they have to be cleared between
+    # tests - otherwise a probe of an earlier test fires again here.
+    ActiveSupport::Reloader.reset_callbacks :prepare
+    ReloadProbe.reset!
   end
 
   # redmine_database_ready? tests
@@ -190,5 +194,42 @@ class LoaderTest < ActiveSupport::TestCase
 
     assert macros.any?
     assert(macros.detect { |macro| macro.include? 'test_macro' })
+  end
+
+  # A custom field format registers itself in a registry that lives on a module
+  # Zeitwerk rebuilds on every reload. require would be a no-op the second time
+  # round, which leaves the format unregistered after a code reload.
+  def test_reload_on_prepare_loads_the_file_again_on_every_prepare
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    loader.reload_on_prepare probe_file('first')
+
+    assert_empty ReloadProbe.loaded, 'registering must not load the file yet'
+
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[first], ReloadProbe.loaded
+
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[first first], ReloadProbe.loaded
+  end
+
+  # Formats may inherit from each other (CompanyFormat < ContactFormat), so a
+  # subclass loaded before its parent raises NameError.
+  def test_reload_on_prepare_keeps_the_registration_order
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    loader.reload_on_prepare probe_file('second')
+    loader.reload_on_prepare probe_file('first')
+
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[second first], ReloadProbe.loaded
+  end
+
+  private
+
+  def probe_file(name)
+    File.join RedminePluginKit::Loader.new(plugin_id: @plugin_id).plugin_dir,
+              'lib', @plugin_id, 'custom_field_formats', "#{name}_format.rb"
   end
 end
