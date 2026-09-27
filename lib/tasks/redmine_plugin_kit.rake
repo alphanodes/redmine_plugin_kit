@@ -46,9 +46,7 @@ namespace :redmine_plugin_kit do
       Setting[setting.to_sym] = value
     else
       plugin_name = :"plugin_#{name}"
-      plugin_settings = Setting[plugin_name]
-      plugin_settings[setting] = value
-      Setting[plugin_name] = plugin_settings
+      Setting[plugin_name] = RedminePluginKit.plugin_settings_with Setting[plugin_name], setting, value
     end
   end
 
@@ -76,7 +74,7 @@ namespace :redmine_plugin_kit do
     else
       plugin_name = :"plugin_#{name}"
       plugin_settings = Setting[plugin_name]
-      puts plugin_settings[setting]
+      puts plugin_settings.with_indifferent_access[setting] if plugin_settings.is_a? Hash
     end
   end
 

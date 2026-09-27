@@ -26,6 +26,17 @@ module RedminePluginKit
       !true?(value)
     end
 
+    # Returns plugin settings with indifferent access and the given setting applied.
+    # Redmine stores plugin settings from the settings form this way, too. Without it,
+    # a string key from the command line would be added next to an existing symbol key,
+    # and plugins reading the symbol key would never see the new value.
+    def plugin_settings_with(settings, setting, value)
+      settings = {} unless settings.is_a? Hash
+      settings = settings.with_indifferent_access
+      settings[setting] = value
+      settings
+    end
+
     def textarea_cols(text, min: 8, max: 20)
       [[min, text.to_s.length / 50].max, max].min # rubocop: disable Style/ComparableClamp
     end
