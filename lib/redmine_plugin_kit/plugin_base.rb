@@ -51,7 +51,6 @@ module RedminePluginKit
       # redmine_automation depending on redmine_reporting) would raise
       # PluginNotFound even though it is installed. To see a plugin's hard
       # AlphaNodes dependencies, look at its REQUIRED_ALPHANODES_PLUGINS constant.
-      # rubocop: disable Style/RaiseArgs
       def setup_required_plugins
         return unless defined? self::REQUIRED_ALPHANODES_PLUGINS
         raise 'VERSION missing for REQUIRED_ALPHANODES_PLUGINS' unless defined? self::VERSION
@@ -59,15 +58,14 @@ module RedminePluginKit
         self::REQUIRED_ALPHANODES_PLUGINS.each do |required_plugin|
           plugin = Redmine::Plugin.find required_plugin
           unless self::VERSION.include? plugin.version
-            raise Redmine::PluginRequirementError.new "#{plugin_id} plugin requires #{required_plugin} plugin version #{self::VERSION}"
+            raise Redmine::PluginRequirementError, "#{plugin_id} plugin requires #{required_plugin} plugin version #{self::VERSION}"
           end
         rescue Redmine::PluginNotFound
-          raise Redmine::PluginRequirementError.new "#{plugin_id} plugin requires the #{required_plugin} plugin." \
-                                              "Please install #{required_plugin} plugin (https://alphanodes.com/#{required_plugin.tr '-',
-                                                                                                                                     '_'})"
+          raise Redmine::PluginRequirementError,
+                "#{plugin_id} plugin requires the #{required_plugin} plugin. " \
+                "Please install #{required_plugin} plugin (https://alphanodes.com/#{required_plugin.tr '-', '_'})"
         end
       end
-      # rubocop: enable Style/RaiseArgs
 
       def init_loader(existing_loader)
         @loader = existing_loader
