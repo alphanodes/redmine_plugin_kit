@@ -21,8 +21,8 @@ module RedminePluginKit
         yield
       end
 
-      def after_initialize(&block)
-        Rails.application.config.after_initialize(&block)
+      def after_initialize(&)
+        Rails.application.config.after_initialize(&)
       end
 
       # required multiple times because of this bug: https://www.redmine.org/issues/33290
@@ -47,6 +47,12 @@ module RedminePluginKit
       self.debug = debug
 
       apply_reset
+    end
+
+    # lib/<point>/ of this plugin holds classes another plugin collects, see
+    # Extensions. Call it in init.rb.
+    def extends(points)
+      Extensions.declare plugin_dir, points
     end
 
     def default_settings
@@ -85,7 +91,7 @@ module RedminePluginKit
               File.join plugin_dir, 'lib', plugin_id, spec
             end
 
-      files = Dir[dir].sort
+      files = Dir[dir]
 
       files.reverse! if reverse
       files.each do |f|

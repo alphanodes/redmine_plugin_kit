@@ -4,6 +4,7 @@ require 'deface'
 
 require 'redmine_plugin_kit/version'
 require 'redmine_plugin_kit/debug'
+require 'redmine_plugin_kit/extensions'
 require 'redmine_plugin_kit/engine'
 require 'redmine_plugin_kit/plugin_base'
 require 'redmine_plugin_kit/loader'

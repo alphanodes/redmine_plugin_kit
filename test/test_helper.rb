@@ -9,9 +9,9 @@ ActiveRecord::Base.configurations = YAML.load_file "#{File.dirname __FILE__}/dat
 ActiveRecord::Base.establish_connection :test
 
 load "#{File.dirname __FILE__}/schema.rb"
-Dir.glob(File.expand_path('../redmine/controllers/*.rb', __FILE__)).sort.each { |f| require f }
-Dir.glob(File.expand_path('../redmine/models/*.rb', __FILE__)).sort.each { |f| require f }
-Dir.glob(File.expand_path('../redmine/helpers/*.rb', __FILE__)).sort.each { |f| require f }
+Dir.glob(File.expand_path('../redmine/controllers/*.rb', __FILE__)).each { |f| require f }
+Dir.glob(File.expand_path('../redmine/models/*.rb', __FILE__)).each { |f| require f }
+Dir.glob(File.expand_path('../redmine/helpers/*.rb', __FILE__)).each { |f| require f }
 
 module ActiveSupport
   class TestCase

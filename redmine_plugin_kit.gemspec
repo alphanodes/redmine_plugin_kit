@@ -17,11 +17,12 @@ Gem::Specification.new do |spec|
   spec.license       = 'GPL-2.0'
 
   spec.files         = Dir['**/*'].reject do |f|
-    f.match %r{^((doc|test|node_modules)/|Rakefile|Gemfile|Gemfile\.lock|redmine_plugin_kit\.gemspec|package\.json|yarn\.lock)}
+    f.match(%r{^((doc|test|node_modules)/|Rakefile|Gemfile|Gemfile\.lock|redmine_plugin_kit\.gemspec|package\.json|yarn\.lock)}) ||
+      f.end_with?('.gem')
   end
 
   spec.require_paths = ['lib']
-  spec.required_ruby_version = '>= 2.7'
+  spec.required_ruby_version = '>= 3.2.0'
 
   spec.add_dependency 'deface', '1.9.0'
   spec.add_dependency 'rails'

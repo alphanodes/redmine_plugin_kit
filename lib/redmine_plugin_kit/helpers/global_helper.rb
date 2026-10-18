@@ -11,7 +11,7 @@ module RedminePluginKit
         link_to name, link, **options
       end
 
-      def link_to_url(url, **options)
+      def link_to_url(url, **)
         return if url.blank?
 
         parts = url.split '://'
@@ -22,7 +22,7 @@ module RedminePluginKit
                  url.chomp '/'
                end
 
-        link_to_external name, url, **options
+        link_to_external(name, url, **)
       end
     end
   end

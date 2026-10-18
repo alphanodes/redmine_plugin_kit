@@ -48,7 +48,7 @@ module RedminePluginKit
       # requires_redmine_plugin runs while init.rb is loaded (during alphabetical
       # registration) and therefore only works for dependencies that load earlier,
       # such as additionals / additional_tags. A dependency that loads later (e.g.
-      # redmine_automation depending on redmine_reporting) would raise
+      # plugin_a depending on plugin_b) would raise
       # PluginNotFound even though it is installed. To see a plugin's hard
       # AlphaNodes dependencies, look at its REQUIRED_ALPHANODES_PLUGINS constant.
       def setup_required_plugins
