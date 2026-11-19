@@ -6,9 +6,9 @@ require File.expand_path '../redmine_test_plugin/redmine_test_plugin', __dir__
 class LoaderTest < ActiveSupport::TestCase
   def setup
     @plugin_id = 'redmine_test_plugin'
-    # to_prepare blocks are kept globally, so they have to be cleared between
-    # tests - otherwise a probe of an earlier test fires again here.
-    ActiveSupport::Reloader.reset_callbacks :prepare
+    # The files to load again are kept on the class, so they have to be
+    # cleared between tests - otherwise a probe of an earlier test fires again.
+    RedminePluginKit::Loader.reloadable_files.clear
     ReloadProbe.reset!
   end
 
@@ -199,17 +199,57 @@ class LoaderTest < ActiveSupport::TestCase
   # A custom field format registers itself in a registry that lives on a module
   # Zeitwerk rebuilds on every reload. require would be a no-op the second time
   # round, which leaves the format unregistered after a code reload.
-  def test_reload_on_prepare_loads_the_file_again_on_every_prepare
+  def test_reload_on_prepare_loads_the_file_again_after_every_code_reload
     loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
     loader.reload_on_prepare probe_file('first')
 
     assert_empty ReloadProbe.loaded, 'registering must not load the file yet'
 
-    ActiveSupport::Reloader.prepare!
+    reload_code
 
     assert_equal %w[first], ReloadProbe.loaded
 
+    reload_code
+
+    assert_equal %w[first first], ReloadProbe.loaded
+  end
+
+  # Without a code reload the class of the file is still there: loading it
+  # again would define its constants twice ("already initialized constant").
+  # This is the prepare run at boot, and every prepare run in production and
+  # test, where code is never unloaded.
+  def test_reload_on_prepare_does_not_load_the_file_without_a_code_reload
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    loader.reload_on_prepare probe_file('first')
+
     ActiveSupport::Reloader.prepare!
+    ActiveSupport::Reloader.prepare!
+
+    assert_empty ReloadProbe.loaded
+  end
+
+  def test_reload_on_prepare_loads_the_file_once_for_several_prepare_runs_after_a_code_reload
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    loader.reload_on_prepare probe_file('first')
+
+    reload_code
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[first], ReloadProbe.loaded
+  end
+
+  # The setup of a plugin runs at boot and after every code reload, so it
+  # registers its files again and again.
+  def test_reload_on_prepare_loads_a_file_once_however_often_it_is_registered
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    3.times { loader.reload_on_prepare probe_file('first') }
+
+    2.times do
+      # the setup runs in the prepare run, before the files are loaded again
+      unload_code
+      loader.reload_on_prepare probe_file('first')
+      ActiveSupport::Reloader.prepare!
+    end
 
     assert_equal %w[first first], ReloadProbe.loaded
   end
@@ -220,10 +260,52 @@ class LoaderTest < ActiveSupport::TestCase
     loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
     loader.reload_on_prepare probe_file('second')
     loader.reload_on_prepare probe_file('first')
+    # a later setup run in another order does not change it
+    loader.reload_on_prepare probe_file('first')
+    loader.reload_on_prepare probe_file('second')
 
-    ActiveSupport::Reloader.prepare!
+    reload_code
 
     assert_equal %w[second first], ReloadProbe.loaded
+  end
+
+  # A file that appears while the application runs is registered in the setup
+  # after the code reload and loaded by its require there.
+  def test_reload_on_prepare_does_not_load_a_file_registered_after_the_code_reload
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    loader.reload_on_prepare probe_file('first')
+
+    unload_code
+    loader.reload_on_prepare probe_file('second')
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[first], ReloadProbe.loaded
+  end
+
+  def test_load_custom_field_format_requires_the_files_once_and_loads_them_after_a_code_reload
+    forget_required_probes
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    # boot: setup, then the prepare run it is part of
+    loader.load_custom_field_format!
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[first second], ReloadProbe.loaded
+
+    # code reload: the setup runs again, its require is a no-op
+    unload_code
+    loader.load_custom_field_format!
+    ActiveSupport::Reloader.prepare!
+
+    assert_equal %w[first second first second], ReloadProbe.loaded
+  end
+
+  def test_load_custom_field_format_keeps_the_reverse_order_after_a_code_reload
+    forget_required_probes
+    loader = RedminePluginKit::Loader.new plugin_id: @plugin_id
+    loader.load_custom_field_format! reverse: true
+    reload_code
+
+    assert_equal %w[second first second first], ReloadProbe.loaded
   end
 
   private
@@ -231,5 +313,21 @@ class LoaderTest < ActiveSupport::TestCase
   def probe_file(name)
     File.join RedminePluginKit::Loader.new(plugin_id: @plugin_id).plugin_dir,
               'lib', @plugin_id, 'custom_field_formats', "#{name}_format.rb"
+  end
+
+  # What a code reload does: unload the classes, then prepare
+  def reload_code
+    unload_code
+    ActiveSupport::Reloader.prepare!
+  end
+
+  def unload_code
+    ActiveSupport::Reloader.new.run_callbacks :class_unload
+  end
+
+  # A probe required by an earlier test would not be loaded by require again
+  def forget_required_probes
+    $LOADED_FEATURES.delete probe_file('first')
+    $LOADED_FEATURES.delete probe_file('second')
   end
 end

@@ -40,6 +40,53 @@ module RedminePluginKit
           Gem.loaded_specs[plugin_id].full_gem_path
         end
       end
+
+      # The files to load again after a code reload, in the order of their
+      # registration, each with the number of code reloads it was last loaded
+      # at. Kept on the class: the setup of a plugin runs at boot and after
+      # every code reload and registers its files each time.
+      def reloadable_files
+        @reloadable_files ||= {}
+      end
+
+      def reload_on_prepare(file)
+        watch_code_reloads
+        # the require of the caller loads the file for this number of reloads
+        reloadable_files[file] ||= code_reloads
+      end
+
+      private
+
+      def code_reloads
+        @code_reloads ||= 0
+      end
+
+      # One callback pair for all files, however often a file is registered
+      def watch_code_reloads
+        return if @watch_code_reloads
+
+        @watch_code_reloads = true
+        # the callbacks run in the context of the reloader
+        loader = self
+        ActiveSupport::Reloader.after_class_unload { loader.send :code_reloaded }
+        ActiveSupport::Reloader.to_prepare { loader.send :load_unloaded_files }
+      end
+
+      def code_reloaded
+        @code_reloads = code_reloads + 1
+      end
+
+      # Prepare also runs without a code reload: at boot, and in production and
+      # test, where code is never unloaded. The class of a file is still there
+      # then, and loading the file again would define its constants twice.
+      def load_unloaded_files
+        reloadable_files.each do |file, loaded_at|
+          next if loaded_at == code_reloads
+
+          load file
+          reloadable_files[file] = code_reloads
+        end
+      end
     end
 
     def initialize(plugin_id:, debug: false)
@@ -104,9 +151,7 @@ module RedminePluginKit
           # plain text field showing the raw id. Reloading the file restores it.
           #
           # NOTE: the require below stays as it is, so booting behaves exactly as
-          # before and does not depend on when to_prepare runs. Loading the file
-          # again in the first prepare run is harmless: these files only define a
-          # class and register it under a fixed name.
+          # before and does not depend on when to_prepare runs.
           reload_on_prepare f
         end
 
@@ -114,14 +159,12 @@ module RedminePluginKit
       end
     end
 
-    # Load the file again after every code reload.
+    # Load the file again in the prepare run after every code reload.
     #
-    # The block keeps the order of the surrounding loop, which matters because
+    # The files keep the order of the surrounding loop, which matters because
     # formats may inherit from each other (CompanyFormat < ContactFormat) - a
     # subclass loaded before its parent raises NameError.
-    def reload_on_prepare(file)
-      ActiveSupport::Reloader.to_prepare { load file }
-    end
+    delegate :reload_on_prepare, to: :class
 
     def incompatible?(plugins = [])
       plugins.each do |plugin|

@@ -29,6 +29,10 @@ module ActiveSupport
   end
 end
 
+# Loader#require_files tells the autoloader of the application which files it
+# loads itself. The application is never initialized.
+class KitTestApplication < Rails::Application; end
+
 # Records which probe files have been loaded, so a test can tell a repeated
 # load from a no-op require (see LoaderTest reload_on_prepare tests).
 class ReloadProbe
